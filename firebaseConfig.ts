@@ -10,7 +10,7 @@
 
 export const FIREBASE_CONFIG = {
   // 👇 请将您的真实信息填入引号中 👇
- apiKey: "AIzaSyDW6G035q488qhrmH5tJQHAYpiYSNdmCls",
+  apiKey: "AIzaSyDW6G035q488qhrmH5tJQHAYpiYSNdmCls",
   authDomain: "project-794979115064563424.firebaseapp.com",
   projectId: "project-794979115064563424",
   storageBucket: "project-794979115064563424.firebasestorage.app",
