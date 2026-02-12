@@ -10,22 +10,23 @@ interface AppLeaderboardProps {
 export const AppLeaderboard: React.FC<AppLeaderboardProps> = ({ currentUser }) => {
   const [rankedUsers, setRankedUsers] = useState<User[]>([]);
 
-  const refreshList = () => {
-    // Filter out banned/deleted
-    const users = getUsers().filter(u => !u.isDeleted && !u.isBanned);
-    // Sort by likes desc
-    users.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-    setRankedUsers(users);
+  const refreshList = async () => {
+    const users = await getUsers();
+    const active = users.filter(u => !u.isDeleted && !u.isBanned);
+    active.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+    setRankedUsers(active);
   };
 
   useEffect(() => {
     refreshList();
+    const interval = setInterval(refreshList, 5000); // Live updates
+    return () => clearInterval(interval);
   }, []);
 
-  const handleLike = (targetId: string) => {
-    if (targetId === currentUser.id) return; // Can't like self
-    likeUser(targetId);
-    refreshList(); // Refresh to show new count
+  const handleLike = async (targetId: string) => {
+    if (targetId === currentUser.id) return;
+    await likeUser(targetId);
+    refreshList();
   };
 
   return (

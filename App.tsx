@@ -19,36 +19,26 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Initialize Database First
-    initializeDatabase();
-
-    // 2. Simulate database connection and session check
-    const checkSession = async () => {
-      // Small delay to prevent hydration mismatch and simulate net check
-      await new Promise(r => setTimeout(r, 200));
-      
-      const user = getCurrentUser();
-      if (user) {
-        setCurrentUser(user);
-        setCurrentView(ViewState.APP_LOBBY);
-      }
-      setLoading(false);
+    const init = async () => {
+        await initializeDatabase();
+        // Check session (async now)
+        const user = await getCurrentUser();
+        if (user) {
+            setCurrentUser(user);
+            setCurrentView(ViewState.APP_LOBBY);
+        }
+        setLoading(false);
     };
-    checkSession();
+    init();
   }, []);
 
-  // 3. Heartbeat for Online Status
+  // Heartbeat
   useEffect(() => {
     if (!currentUser) return;
-    
-    // Beat immediately
     updateUserHeartbeat(currentUser.id);
-
-    // Beat every 10 seconds to indicate "I am online"
     const interval = setInterval(() => {
         updateUserHeartbeat(currentUser.id);
     }, 10000);
-
     return () => clearInterval(interval);
   }, [currentUser]);
 
@@ -56,8 +46,8 @@ function App() {
     setCurrentView(view);
   };
 
-  const handleLoginSuccess = () => {
-    const user = getCurrentUser();
+  const handleLoginSuccess = async () => {
+    const user = await getCurrentUser();
     if (user) {
       setCurrentUser(user);
       setCurrentView(ViewState.APP_LOBBY);
@@ -80,13 +70,11 @@ function App() {
     );
   }
 
-  // If we are logged in as a regular user, use the AppLayout
   const isAppView = [ViewState.APP_LOBBY, ViewState.APP_LEADERBOARD, ViewState.APP_FRIENDS, ViewState.APP_PROFILE].includes(currentView);
 
   if (currentUser && isAppView) {
     return (
       <div className="min-h-screen w-full relative bg-[#020205] flex items-center justify-center overflow-hidden">
-        {/* Background Effects */}
         <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/10 via-[#020205] to-[#020205] pointer-events-none"></div>
         <div className="fixed inset-0 stars pointer-events-none opacity-40"></div>
         
@@ -105,7 +93,6 @@ function App() {
     );
   }
 
-  // Otherwise use the Public/Admin Layout
   return (
     <Layout currentView={currentView} onNavigate={handleNavigate}>
       {currentView === ViewState.LOGIN && <UserLogin onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />}
